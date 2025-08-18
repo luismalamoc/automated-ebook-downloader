@@ -1,0 +1,312 @@
+[
+  {
+    "name": "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
+    "value": "en",
+    "domain": "login.manning.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "TGC",
+    "value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCIsImtpZCI6IjRjYjZjYjJkLTljZTMtNDdmNS04NDg5LWJiZDdiNzFlNWEwMCJ9.ZXlKNmFYQWlPaUpFUlVZaUxDSmhiR2NpT2lKa2FYSWlMQ0psYm1NaU9pSkJNVEk0UTBKRExVaFRNalUySWl3aVkzUjVJam9pU2xkVUlpd2lkSGx3SWpvaVNsZFVJaXdpYTJsa0lqb2lOMk16Tm1NM00yTXRPVE0xWXkwMFpUazFMV0ZtTm1ZdE9UaGpNRGhoTXpKak5HRmhJbjAuLnZoMmx4cm5YY3I1Y2xwd1V4WlZzTGcuVi1xd3JJV0hEejhkdVZpVFdOMU1rai1iNWxGWjNndkdDYzc5OG12amNQVU5wMG82VUxHa0FsZV9PV0g1akU4MmFwZWQtQ2ZWaTZjY0EzV3NmaEpBN3JUeGNPbnN3Yk5nTTRLVEZQRTc4WllqajFnUVBrNkc2TEhNdFlNbk9odFBWSHJDNV95bW0zaHBfYnl2aHFreDJwSzlCa0V4ZFAyNUxIdU54dVNpRmFud1RPUE0zUzB4WGVDSVp2SU9jaF9HU2lJaG1GeDNyYUhXQkcwYWI2RDdTX0lsVFRMRFNWR2E5VDJKR1VLTlU1MEEyZVA2MHRyZDdYVExkNjJEc0VyQ0NHTjRoUlVIdFBlVkd0ZXQ0TlZOSkEuYVZWNHFZSkp1TnpCS3hTTjd0VmJJQQ.SEIHHYkIvCbuywFJuhdbPxfPZjupKK5unfcXdfzWl7TFAO3PKSb-6ytaOF5zbbe2rT2_GiJd1hs9awim-OWyuw",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "JSESSIONID",
+    "value": "EE5B98C11C7283E35EA9E132607B70D5",
+    "domain": "www.manning.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "mrm",
+    "value": "bHVpc21hbGFtb2MlNDBnbWFpbC5jb206MTc1ODEzMzU1NDcwMzo4ZjJmZDMxYjczODhhNTE5ZmFiNDNkYzRjNjdjMDZmNg",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1758133556.957045,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "M_I",
+    "value": "25e49df7-9753-4c05-828c-da0d6410787e",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1790101557.456789,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "c_i",
+    "value": "d18e27c8-ab1d-498c-b49d-eeeb45c28861-7",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1758133557.456887,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ABC-MANNING_header_size",
+    "value": "ABC-MANNING_header_size-B",
+    "domain": "www.manning.com",
+    "path": "/",
+    "expires": 1763317557,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ABC-MANNING_add_to_cart_discount",
+    "value": "ABC-MANNING_add_to_cart_discount-A",
+    "domain": "www.manning.com",
+    "path": "/",
+    "expires": 1763317557,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ABC-MANNING_auth_delegate",
+    "value": "ABC-MANNING_auth_delegate-B",
+    "domain": "www.manning.com",
+    "path": "/",
+    "expires": 1763317557,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ABC-MANNING_faq_versions",
+    "value": "ABC-MANNING_FAQ_A",
+    "domain": "www.manning.com",
+    "path": "/",
+    "expires": 1763317557,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_gcl_au",
+    "value": "1.1.1612237181.1755541559",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1763317559,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga_NMEV8ZBBN1",
+    "value": "GS2.1.s1755541558$o1$g1$t1755541559$j59$l0$h0",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1790101559.144074,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "QO3hNCw48Mjs4ARF9zePC2b1YVcolbmiHjrqzg_At1k-1755541557-1.0.1.1-WwCMKaFbXhzNjQpr6V89.wmrDxTg_z2h_SEqZat1diJASEk3pWRF.aT6En_H4XEtGvEaIqdsanJw3mQgG8Mflza6ndkjelrJ0KCauqIhSGw",
+    "domain": ".hs-scripts.com",
+    "path": "/",
+    "expires": 1755543359.462874,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_ga",
+    "value": "GA1.2.1947120489.1755541558",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1790101559.48345,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_gid",
+    "value": "GA1.2.237877268.1755541559",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1755627959,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_gat",
+    "value": "1",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1755541619,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_rdt_uuid",
+    "value": "1755541559509.4c83440f-c9a9-4783-85dd-9afb480420a6",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1763317559,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Strict"
+  },
+  {
+    "name": "_rdt_em",
+    "value": "0000000000000000000000000000000000000000000000000000000000000001",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1763317559,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Strict"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "_49a5I1Xs3ItVLlMbqCLbSFovA4H7ISRnsEmCzVm764-1755541557-1.0.1.1-Hsh_vAJ9KwiRGf2wenR9u8.LrCPyO65BZfyZBPPQaeoQeX1LycVuXYLvyyM5lfajPYeVIvSy6zHv21ItPEdet0hWpGtjfu2uQ5Vn9PaDP60",
+    "domain": ".hs-banner.com",
+    "path": "/",
+    "expires": 1755543359.7349,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "hX5jboduAtH65uc4sRyC7tDZHrVE.2TOgqGBdMlYbC4-1755541557-1.0.1.1-HYAmfv8Dc9LgxmsDB72hMkUJebLga1iJ5cAxAgqqTvJO2UN.jOBunbm3KfAOvOjdnWGCcxZBfErI465SWuC70WluLK15B1wxECNTBVHnuWQ",
+    "domain": ".hs-analytics.net",
+    "path": "/",
+    "expires": 1755543359.911897,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "test_cookie",
+    "value": "CheckForPermission",
+    "domain": ".doubleclick.net",
+    "path": "/",
+    "expires": 1755542459.91358,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_fbp",
+    "value": "fb.1.1755541559979.828598797362759009",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1763317560,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga_D5HCM85R71",
+    "value": "GS2.2.s1755541560$o1$g1$t1755541560$j60$l0$h0",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1790101560.216592,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "5_f43nlhB55DH_4cqxliR_uBCg4j4vsmTFpSL2du_1A-1755541558-1.0.1.1-U2Esw6az3xfQyZtfg8ZgPplOGc8KeOZyxpE0fTZowaY6wjLzSbOFi75UNF1u_KAiMVumti9pSFcxLzmVFJIcFl0ASReb70jqbPfyxL3IbMM",
+    "domain": ".hsforms.com",
+    "path": "/",
+    "expires": 1755543360.731306,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_cfuvid",
+    "value": "ouhraL33fLspYPuKkNZ8ZMnIClFIH.x07KKwT9UOpP8-1755541558551-0.0.1.1-604800000",
+    "domain": ".hsforms.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_hjSessionUser_784152",
+    "value": "eyJpZCI6ImI0YTk2YzBjLTY1MWUtNWE0OC04ZDZhLTdlNzhiYjYwMGJlYiIsImNyZWF0ZWQiOjE3NTU1NDE1NjA3MzAsImV4aXN0aW5nIjpmYWxzZX0=",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1787077560,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_hjSession_784152",
+    "value": "eyJpZCI6IjQ5NmQ5YzBhLTQxNGItNDYyOS1iYjViLWI4MWYyN2NjYWFmYSIsImMiOjE3NTU1NDE1NjA3MzQsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1755543360,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__hstc",
+    "value": "242263645.7126a4209349d4cab78999c97f825a1e.1755541560759.1755541560759.1755541560759.1",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1771093560,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "hubspotutk",
+    "value": "7126a4209349d4cab78999c97f825a1e",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1771093560,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__hssrc",
+    "value": "1",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__hssc",
+    "value": "242263645.1.1755541560759",
+    "domain": ".manning.com",
+    "path": "/",
+    "expires": 1755543360,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  }
+]

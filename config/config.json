@@ -1,0 +1,21 @@
+{
+  "sites": {
+    "manning": {
+      "name": "Manning Publications",
+      "loginUrl": "https://www.manning.com/dashboard",
+      "dashboardUrl": "https://www.manning.com/dashboard",
+      "downloadFormats": ["pdf", "epub"],
+      "rateLimit": 2000
+    }
+  },
+  "downloads": {
+    "baseDir": "./downloads",
+    "createSiteSubfolders": true,
+    "filenameMaxLength": 200
+  },
+  "browser": {
+    "headless": false,
+    "timeout": 30000,
+    "downloadTimeout": 60000
+  }
+}
