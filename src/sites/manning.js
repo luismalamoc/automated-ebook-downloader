@@ -88,7 +88,7 @@ class ManningDownloader {
     if (book.hasPdf && book.pdfUrl) {
       console.log(chalk.blue(`  📄 Downloading PDF: ${book.title}`));
       const result = await this.downloadFormatFromRow(book, 'PDF', row, usedDropdownIndex);
-      if (result.success) {
+      if (result && result.success) {
         usedDropdownIndex = result.dropdownIndex;
         console.log(chalk.green(`  📄 PDF SUCCESS (used dropdown ${usedDropdownIndex + 1})`));
       } else {
@@ -102,7 +102,11 @@ class ManningDownloader {
       
       try {
         const result = await this.downloadFormatFromRow(book, 'EPUB', row, usedDropdownIndex);
-        console.log(chalk[result.success ? 'green' : 'red'](`  📱 EPUB ${result.success ? 'SUCCESS' : 'FAILED'}`));
+        if (result && result.success) {
+          console.log(chalk.green(`  📱 EPUB SUCCESS`));
+        } else {
+          console.log(chalk.red(`  📱 EPUB FAILED`));
+        }
       } catch (epubError) {
         console.log(chalk.red(`  📱 EPUB FAILED: ${epubError.message}`));
       }
@@ -677,7 +681,7 @@ class ManningDownloader {
         await download.saveAs(filepath);
         console.log(chalk.green(`✅ Saved: ${filename}`));
         
-        return true;
+        return { success: true, dropdownIndex: correctDropdownIndex };
         
       } catch (downloadTimeout) {
         console.log(chalk.yellow(`  ⏰ Download timeout - trying alternative approach`));
