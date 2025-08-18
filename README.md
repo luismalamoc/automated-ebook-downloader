@@ -1,4 +1,4 @@
-# Automatic Ebook Downloader
+# Automated Ebook Downloader
 
 An automated ebook downloader for multiple platforms using Playwright.
 

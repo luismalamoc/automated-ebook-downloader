@@ -49,35 +49,58 @@ class ManningDownloader {
 
   async downloadBooks(books) {
     console.log(chalk.blue(`📚 Found ${books.length} books to download`));
+    console.log(chalk.green(`🚀 Starting full download of all books...`));
     
-    // DEBUG: Test with just the first book
-    const testBooks = books.slice(0, 1);
-    console.log(chalk.yellow(`🧪 DEBUG MODE: Testing with first book only`));
-    
-    for (let i = 0; i < testBooks.length; i++) {
-      const book = testBooks[i];
-      console.log(chalk.cyan(`📖 Downloading book ${i + 1}/${testBooks.length}: ${book.title}`));
+    for (let i = 0; i < books.length; i++) {
+      const book = books[i];
+      console.log(chalk.cyan(`📖 Downloading book ${i + 1}/${books.length}: ${book.title}`));
       
       // Debug: Show what URLs we have for this book
       console.log(chalk.gray(`  🔗 PDF URL: ${book.pdfUrl || 'None'}`));
       console.log(chalk.gray(`  🔗 EPUB URL: ${book.epubUrl || 'None'}`));
       
-      // Download PDF if available
-      if (book.hasPdf && book.pdfUrl) {
-        console.log(chalk.blue(`  📄 Downloading PDF: ${book.title}`));
-        const success = await this.downloadFormat(book, 'PDF');
-        console.log(chalk[success ? 'green' : 'red'](`  📄 PDF ${success ? 'SUCCESS' : 'FAILED'}`));
-      }
-      
-      // Download EPUB if available
-      if (book.hasEpub && book.epubUrl) {
-        console.log(chalk.blue(`  📱 Downloading EPUB: ${book.title}`));
-        const success = await this.downloadFormat(book, 'EPUB');
-        console.log(chalk[success ? 'green' : 'red'](`  📱 EPUB ${success ? 'SUCCESS' : 'FAILED'}`));
-      }
+      // Download both formats for this book without refreshing page
+      await this.downloadBookFormats(book);
       
       // Small delay between books
-      await this.page.waitForTimeout(2000);
+      await this.page.waitForTimeout(800);
+    }
+  }
+
+  async downloadBookFormats(book) {
+    // Navigate to dashboard once per book
+    await this.page.goto('https://www.manning.com/dashboard');
+    await this.page.waitForTimeout(2000);
+    await this.page.waitForSelector('#productTable tbody tr', { timeout: 8000 });
+    
+    // Get the book row
+    const bookRows = await this.page.locator('table tbody tr').all();
+    if (book.index >= bookRows.length) {
+      console.log(chalk.yellow(`⚠️  Book index ${book.index} out of range`));
+      return;
+    }
+    const row = bookRows[book.index];
+    
+    // Download PDF if available
+    if (book.hasPdf && book.pdfUrl) {
+      console.log(chalk.blue(`  📄 Downloading PDF: ${book.title}`));
+      const success = await this.downloadFormatFromRow(book, 'PDF', row);
+      console.log(chalk[success ? 'green' : 'red'](`  📄 PDF ${success ? 'SUCCESS' : 'FAILED'}`));
+    }
+    
+    // Download EPUB if available (using same row, no refresh)
+    if (book.hasEpub && book.epubUrl) {
+      console.log(chalk.blue(`  📱 Downloading EPUB: ${book.title}`));
+      
+      try {
+        const success = await this.downloadFormatFromRow(book, 'EPUB', row);
+        console.log(chalk[success ? 'green' : 'red'](`  📱 EPUB ${success ? 'SUCCESS' : 'FAILED'}`));
+      } catch (epubError) {
+        console.log(chalk.red(`  📱 EPUB FAILED: ${epubError.message}`));
+      }
+      
+      // Add delay between PDF and EPUB downloads
+      await this.page.waitForTimeout(1000);
     }
   }
 
@@ -207,38 +230,59 @@ class ManningDownloader {
           continue;
         }
         
-        // Extract book title - Manning puts title in first cell link
+        // Extract book title - Manning puts title in first cell
         let title = `Book ${i + 1}`;
         
         try {
-          const titleElement = await row.locator('td:first-child a').first();
-          const titleCount = await titleElement.count();
-          if (titleCount > 0) {
-            const titleText = await titleElement.textContent();
-            if (titleText && titleText.trim()) {
-              title = titleText.trim();
+          // Extract title from the href URL - this is the most reliable method
+          const bookLink = await row.locator('td:first-child a[href*="/books/"]').first();
+          if (await bookLink.count() > 0) {
+            const href = await bookLink.getAttribute('href');
+            if (href && href.includes('/books/')) {
+              // Extract book slug from URL like /books/grokking-algorithms
+              const urlParts = href.split('/books/');
+              if (urlParts.length > 1) {
+                const bookSlug = urlParts[1].split('/')[0];
+                // Convert slug to readable title
+                title = bookSlug
+                  .replace(/-/g, ' ')
+                  .replace(/\b\w/g, l => l.toUpperCase())
+                  .trim();
+                console.log(chalk.green(`  ✅ Found title from URL: "${title}"`));
+              }
             }
-          } else {
-            // Try alternative selectors for title
-            const altTitleSelectors = [
-              'td:first-child',
-              '.book-title',
-              '.title',
-              'h3',
-              'h2'
-            ];
+          }
+          
+          // If no clean title found, try to extract from the image alt text or other attributes
+          if (title === `Book ${i + 1}`) {
+            // Try image alt text first
+            const bookImage = await row.locator('td:first-child img').first();
+            if (await bookImage.count() > 0) {
+              const altText = await bookImage.getAttribute('alt');
+              if (altText && altText.trim() && altText.length > 3) {
+                title = altText.trim();
+                console.log(chalk.green(`  📖 Found title from image alt: "${title}"`));
+              }
+            }
             
-            for (const selector of altTitleSelectors) {
-              const altElement = await row.locator(selector).first();
-              if (await altElement.count() > 0) {
-                const altText = await altElement.textContent();
-                if (altText && altText.trim()) {
-                  title = altText.trim();
-                  break;
+            // If still no title, try href attribute of the link
+            if (title === `Book ${i + 1}`) {
+              const bookLink = await row.locator('td:first-child a').first();
+              if (await bookLink.count() > 0) {
+                const href = await bookLink.getAttribute('href');
+                if (href && href.includes('/book/')) {
+                  // Extract book name from URL like /book/modern-c-third-edition
+                  const urlParts = href.split('/book/');
+                  if (urlParts.length > 1) {
+                    const bookSlug = urlParts[1].split('/')[0];
+                    title = bookSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    console.log(chalk.green(`  📖 Found title from URL: "${title}"`));
+                  }
                 }
               }
             }
           }
+          
         } catch (titleError) {
           console.log(chalk.yellow(`⚠️  Error extracting title for row ${i}: ${titleError.message}`));
         }
@@ -432,26 +476,12 @@ class ManningDownloader {
     }
   }
 
-  async downloadFormat(book, format) {
+  async downloadFormatFromRow(book, format, row) {
     const bookTitle = book.title || `Book_${book.index || 'Unknown'}`;
     const sanitizedTitle = this.sanitizeFilename(bookTitle);
     
     try {
       console.log(chalk.blue(`🔍 Downloading ${format} for: ${bookTitle}`));
-      
-      // Navigate back to dashboard to find the actual link element
-      await this.page.goto('https://www.manning.com/dashboard');
-      await this.page.waitForTimeout(3000);
-      
-      // Find the book row again
-      const bookRows = await this.page.locator('table tbody tr').all();
-      
-      if (book.index >= bookRows.length) {
-        console.log(chalk.yellow(`⚠️  Book index ${book.index} out of range`));
-        return false;
-      }
-      
-      const row = bookRows[book.index];
       
       // Find the download link in this row
       const formatUrl = format === 'PDF' ? book.pdfUrl : book.epubUrl;
@@ -462,24 +492,67 @@ class ManningDownloader {
       
       console.log(chalk.gray(`  🔗 Looking for link: ${formatUrl}`));
       
-      // First, find and click the dropdown button to reveal the download links
-      console.log(chalk.blue(`🔽 Looking for dropdown button in row...`));
+      // Find the specific dropdown button that contains the format we want
+      console.log(chalk.blue(`🔽 Looking for ${format} dropdown button in row...`));
       
-      // Look for dropdown button (usually a button or element with dropdown class)
-      const dropdownButton = await row.locator('button.dropdown-toggle, .dropdown-toggle, button[data-toggle="dropdown"], .btn-group button').first();
-      const dropdownCount = await dropdownButton.count();
+      // Get all dropdown buttons in this row
+      const allDropdownButtons = await row.locator('button.dropdown-toggle, .dropdown-toggle, button[data-toggle="dropdown"], .btn-group button').all();
       
-      if (dropdownCount === 0) {
-        console.log(chalk.yellow(`⚠️  Could not find dropdown button for ${format}`));
+      if (allDropdownButtons.length === 0) {
+        console.log(chalk.yellow(`⚠️  Could not find any dropdown buttons for ${format}`));
         return false;
       }
       
-      console.log(chalk.blue(`🖱️  Opening dropdown for ${format} downloads...`));
+      console.log(chalk.gray(`  Found ${allDropdownButtons.length} dropdown buttons in row`));
       
-      // Click dropdown to open it
-      await dropdownButton.scrollIntoViewIfNeeded();
-      await dropdownButton.click();
-      await this.page.waitForTimeout(1000); // Wait for dropdown to open
+      let correctDropdownButton = null;
+      
+      // Close any previously open dropdowns first
+      await this.page.click('body');
+      await this.page.waitForTimeout(300);
+      
+      // Try each dropdown button to find the one that contains our format
+      for (let i = 0; i < allDropdownButtons.length; i++) {
+        const dropdownButton = allDropdownButtons[i];
+        
+        console.log(chalk.gray(`  🔍 Testing dropdown ${i + 1}/${allDropdownButtons.length} for ${format}...`));
+        
+        // Close any open dropdowns first
+        await this.page.click('body');
+        await this.page.waitForTimeout(300);
+        
+        // Click to open this specific dropdown
+        await dropdownButton.scrollIntoViewIfNeeded();
+        await dropdownButton.click();
+        await this.page.waitForTimeout(800);
+        
+        // Check if this dropdown contains our format link
+        const formatLinkInDropdown = await this.page.locator(`a[href="${formatUrl}"]`).first();
+        const linkExists = await formatLinkInDropdown.count() > 0;
+        
+        if (linkExists) {
+          console.log(chalk.green(`  ✅ Found ${format} link in dropdown ${i + 1}/${allDropdownButtons.length}`));
+          correctDropdownButton = dropdownButton;
+          break;
+        } else {
+          console.log(chalk.gray(`  ❌ Dropdown ${i + 1}/${allDropdownButtons.length} doesn't contain ${format} link`));
+          
+          // Debug: Show what links are in this dropdown
+          const allLinksInDropdown = await this.page.locator('a[href*="download"]').all();
+          console.log(chalk.gray(`    Found ${allLinksInDropdown.length} download links in this dropdown:`));
+          for (let j = 0; j < Math.min(allLinksInDropdown.length, 3); j++) {
+            const href = await allLinksInDropdown[j].getAttribute('href');
+            console.log(chalk.gray(`      - ${href}`));
+          }
+        }
+      }
+      
+      if (!correctDropdownButton) {
+        console.log(chalk.yellow(`⚠️  Could not find dropdown containing ${format} link`));
+        return false;
+      }
+      
+      console.log(chalk.blue(`🖱️  Using correct dropdown for ${format} downloads...`));
       
       // Now look for the download link in the opened dropdown
       const downloadLink = await this.page.locator(`a[href="${formatUrl}"]`).first();
@@ -493,11 +566,41 @@ class ManningDownloader {
       console.log(chalk.blue(`🖱️  Clicking download link for ${format}`));
       
       // Set up download promise before clicking
-      const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 });
+      const downloadPromise = this.page.waitForEvent('download', { timeout: 45000 });
       
       // Ensure link is visible and ready for interaction
-      await downloadLink.scrollIntoViewIfNeeded();
-      await downloadLink.waitFor({ state: 'visible' });
+      try {
+        await downloadLink.scrollIntoViewIfNeeded({ timeout: 3000 });
+        await downloadLink.waitFor({ state: 'visible', timeout: 3000 });
+      } catch (visibilityError) {
+        console.log(chalk.yellow(`⚠️  Link not visible, trying alternative approach for ${format}`));
+        
+        // Close any open dropdowns first
+        await this.page.click('body');
+        await this.page.waitForTimeout(300);
+        
+        // Re-open the dropdown
+        const newDropdownButton = await row.locator('button.dropdown-toggle, .dropdown-toggle, button[data-toggle="dropdown"], .btn-group button').first();
+        if (await newDropdownButton.count() > 0) {
+          await newDropdownButton.click();
+          await this.page.waitForTimeout(800);
+          
+          // Try to find the link again
+          const newDownloadLink = await this.page.locator(`a[href="${formatUrl}"]`).first();
+          if (await newDownloadLink.count() > 0) {
+            await newDownloadLink.scrollIntoViewIfNeeded({ timeout: 2000 });
+            await newDownloadLink.waitFor({ state: 'visible', timeout: 2000 });
+            // Update the downloadLink reference
+            const downloadLink = newDownloadLink;
+          } else {
+            console.log(chalk.red(`❌ Could not find ${format} link after retry`));
+            return false;
+          }
+        } else {
+          console.log(chalk.red(`❌ Could not find dropdown button for retry`));
+          return false;
+        }
+      }
       
       // Small delay to simulate human behavior
       await this.page.waitForTimeout(500);
@@ -510,8 +613,13 @@ class ManningDownloader {
       });
       console.log(chalk.green(`  ✅ Download link clicked`));
       
+      // Additional wait after click for EPUB downloads (they seem slower)
+      if (format === 'EPUB') {
+        await this.page.waitForTimeout(800);
+      }
+      
       // Wait a moment for any processing
-      await this.page.waitForTimeout(2000);
+      await this.page.waitForTimeout(1000);
       
       // Check current URL and page state
       const currentUrl = this.page.url();
@@ -574,23 +682,24 @@ class ManningDownloader {
         return false;
       }
       
+      // Close any open dropdowns before finishing
+      await this.page.click('body');
+      await this.page.waitForTimeout(300);
+      
       // Small delay before next action
-      await this.page.waitForTimeout(2000);
+      await this.page.waitForTimeout(800);
       
       return true;
       
     } catch (error) {
       console.log(chalk.red(`❌ Failed to download ${format}: ${error.message}`));
       
-      // Take error screenshot
+      // Always close dropdowns on error to prevent interference with next format
       try {
-        await this.page.screenshot({ 
-          path: `error-${sanitizedTitle}-${format.toLowerCase()}.png`,
-          fullPage: true 
-        });
-        
-      } catch (screenshotError) {
-        console.log(chalk.yellow(`  ⚠️  Could not take screenshot: ${screenshotError.message}`));
+        await this.page.click('body');
+        await this.page.waitForTimeout(300);
+      } catch (cleanupError) {
+        // Ignore cleanup errors
       }
       
       return false;
@@ -602,10 +711,12 @@ class ManningDownloader {
       return 'Unknown_Book';
     }
     return filename
-      .replace(/[<>:"/\\|?*]/g, '') // Remove invalid characters
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/[<>:"/\\|?*]/g, '_') // Replace invalid characters with underscore
+      .replace(/\s+/g, '_') // Replace spaces with underscores for better file names
+      .replace(/_{2,}/g, '_') // Replace multiple underscores with single
+      .replace(/^_+|_+$/g, '') // Remove leading/trailing underscores
       .trim()
-      .substring(0, 200); // Limit length
+      .substring(0, 150); // Reasonable length limit
   }
 }
 
