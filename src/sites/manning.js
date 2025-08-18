@@ -81,20 +81,28 @@ class ManningDownloader {
     }
     const row = bookRows[book.index];
     
+    // Track which dropdown was used for PDF
+    let usedDropdownIndex = -1;
+    
     // Download PDF if available
     if (book.hasPdf && book.pdfUrl) {
       console.log(chalk.blue(`  📄 Downloading PDF: ${book.title}`));
-      const success = await this.downloadFormatFromRow(book, 'PDF', row);
-      console.log(chalk[success ? 'green' : 'red'](`  📄 PDF ${success ? 'SUCCESS' : 'FAILED'}`));
+      const result = await this.downloadFormatFromRow(book, 'PDF', row, usedDropdownIndex);
+      if (result.success) {
+        usedDropdownIndex = result.dropdownIndex;
+        console.log(chalk.green(`  📄 PDF SUCCESS (used dropdown ${usedDropdownIndex + 1})`));
+      } else {
+        console.log(chalk.red(`  📄 PDF FAILED`));
+      }
     }
     
-    // Download EPUB if available (using same row, no refresh)
+    // Download EPUB if available (using same row, no refresh, but different dropdown)
     if (book.hasEpub && book.epubUrl) {
       console.log(chalk.blue(`  📱 Downloading EPUB: ${book.title}`));
       
       try {
-        const success = await this.downloadFormatFromRow(book, 'EPUB', row);
-        console.log(chalk[success ? 'green' : 'red'](`  📱 EPUB ${success ? 'SUCCESS' : 'FAILED'}`));
+        const result = await this.downloadFormatFromRow(book, 'EPUB', row, usedDropdownIndex);
+        console.log(chalk[result.success ? 'green' : 'red'](`  📱 EPUB ${result.success ? 'SUCCESS' : 'FAILED'}`));
       } catch (epubError) {
         console.log(chalk.red(`  📱 EPUB FAILED: ${epubError.message}`));
       }
@@ -476,7 +484,7 @@ class ManningDownloader {
     }
   }
 
-  async downloadFormatFromRow(book, format, row) {
+  async downloadFormatFromRow(book, format, row, excludeDropdownIndex = -1) {
     const bookTitle = book.title || `Book_${book.index || 'Unknown'}`;
     const sanitizedTitle = this.sanitizeFilename(bookTitle);
     
@@ -487,10 +495,13 @@ class ManningDownloader {
       const formatUrl = format === 'PDF' ? book.pdfUrl : book.epubUrl;
       if (!formatUrl) {
         console.log(chalk.yellow(`⚠️  No ${format} URL found for ${bookTitle}`));
-        return false;
+        return { success: false, dropdownIndex: -1 };
       }
       
       console.log(chalk.gray(`  🔗 Looking for link: ${formatUrl}`));
+      if (excludeDropdownIndex >= 0) {
+        console.log(chalk.gray(`  🚫 Excluding dropdown ${excludeDropdownIndex + 1} (already used for other format)`));
+      }
       
       // Find the specific dropdown button that contains the format we want
       console.log(chalk.blue(`🔽 Looking for ${format} dropdown button in row...`));
@@ -500,12 +511,13 @@ class ManningDownloader {
       
       if (allDropdownButtons.length === 0) {
         console.log(chalk.yellow(`⚠️  Could not find any dropdown buttons for ${format}`));
-        return false;
+        return { success: false, dropdownIndex: -1 };
       }
       
       console.log(chalk.gray(`  Found ${allDropdownButtons.length} dropdown buttons in row`));
       
       let correctDropdownButton = null;
+      let correctDropdownIndex = -1;
       
       // Close any previously open dropdowns first
       await this.page.click('body');
@@ -513,9 +525,25 @@ class ManningDownloader {
       
       // Try each dropdown button to find the one that contains our format
       for (let i = 0; i < allDropdownButtons.length; i++) {
+        // Skip the dropdown that was already used for the other format
+        if (i === excludeDropdownIndex) {
+          console.log(chalk.gray(`  ⏭️  Skipping dropdown ${i + 1}/${allDropdownButtons.length} (already used)`));
+          continue;
+        }
+        
         const dropdownButton = allDropdownButtons[i];
         
-        console.log(chalk.gray(`  🔍 Testing dropdown ${i + 1}/${allDropdownButtons.length} for ${format}...`));
+        // First check if this dropdown has the right text content (pdf/epub/kindle)
+        const dropdownText = await dropdownButton.textContent();
+        const expectedText = format.toLowerCase();
+        
+        console.log(chalk.gray(`  🔍 Testing dropdown ${i + 1}/${allDropdownButtons.length} (text: "${dropdownText?.trim()}") for ${format}...`));
+        
+        // If the dropdown text doesn't match the format, skip it
+        if (dropdownText && !dropdownText.toLowerCase().includes(expectedText)) {
+          console.log(chalk.gray(`  ❌ Dropdown ${i + 1} text "${dropdownText.trim()}" doesn't match ${format}, skipping`));
+          continue;
+        }
         
         // Close any open dropdowns first
         await this.page.click('body');
@@ -531,8 +559,9 @@ class ManningDownloader {
         const linkExists = await formatLinkInDropdown.count() > 0;
         
         if (linkExists) {
-          console.log(chalk.green(`  ✅ Found ${format} link in dropdown ${i + 1}/${allDropdownButtons.length}`));
+          console.log(chalk.green(`  ✅ Found ${format} link in dropdown ${i + 1}/${allDropdownButtons.length} (text: "${dropdownText?.trim()}")`));
           correctDropdownButton = dropdownButton;
+          correctDropdownIndex = i;
           break;
         } else {
           console.log(chalk.gray(`  ❌ Dropdown ${i + 1}/${allDropdownButtons.length} doesn't contain ${format} link`));
@@ -549,7 +578,7 @@ class ManningDownloader {
       
       if (!correctDropdownButton) {
         console.log(chalk.yellow(`⚠️  Could not find dropdown containing ${format} link`));
-        return false;
+        return { success: false, dropdownIndex: -1 };
       }
       
       console.log(chalk.blue(`🖱️  Using correct dropdown for ${format} downloads...`));
@@ -560,7 +589,7 @@ class ManningDownloader {
       
       if (linkCount === 0) {
         console.log(chalk.yellow(`⚠️  Could not find download link in dropdown for ${format}`));
-        return false;
+        return { success: false, dropdownIndex: -1 };
       }
       
       console.log(chalk.blue(`🖱️  Clicking download link for ${format}`));
@@ -689,7 +718,7 @@ class ManningDownloader {
       // Small delay before next action
       await this.page.waitForTimeout(800);
       
-      return true;
+      return { success: true, dropdownIndex: correctDropdownIndex };
       
     } catch (error) {
       console.log(chalk.red(`❌ Failed to download ${format}: ${error.message}`));
@@ -702,7 +731,7 @@ class ManningDownloader {
         // Ignore cleanup errors
       }
       
-      return false;
+      return { success: false, dropdownIndex: -1 };
     }
   }
 
